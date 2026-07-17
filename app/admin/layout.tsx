@@ -1,28 +1,9 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { requireAdminAuth } from '@/lib/auth/admin-check'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-
-  if (!session) {
-    redirect('/login')
-  }
-
-  // Check if user is admin
-  const { data: userData } = await supabase.auth.getUser()
-  
-  if (!userData.user) {
-    redirect('/login')
-  }
-
-  // Check if user has admin role
-  const isAdmin = userData.user.user_metadata?.role === 'admin' || 
-                  userData.user.app_metadata?.role === 'admin'
-
-  if (!isAdmin) {
-    redirect('/portal')
-  }
+  // Check if user is authenticated and has admin role
+  await requireAdminAuth()
 
   return (
     <div className="min-h-screen bg-background">
