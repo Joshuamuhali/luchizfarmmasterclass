@@ -3,16 +3,49 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 
 export default function AdminUploadsPage() {
   const [uploading, setUploading] = useState(false)
   const [files, setFiles] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
+    checkAdminStatus()
     loadFiles()
   }, [])
+
+  const checkAdminStatus = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        router.push('/admin/login')
+        return
+      }
+
+      // Check if user has admin role in profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      const profileData = profile as { role: string } | null
+      if (profileData?.role !== 'admin') {
+        router.push('/admin/login')
+        return
+      }
+
+      setIsAdmin(true)
+    } catch (error) {
+      console.error('Error checking admin status:', error)
+      router.push('/admin/login')
+    }
+  }
 
   const loadFiles = async () => {
     try {
@@ -93,6 +126,14 @@ export default function AdminUploadsPage() {
       console.error('Delete error:', error)
       alert('Failed to delete file')
     }
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <p className="text-center text-foreground/70">Checking permissions...</p>
+      </div>
+    )
   }
 
   if (loading) {

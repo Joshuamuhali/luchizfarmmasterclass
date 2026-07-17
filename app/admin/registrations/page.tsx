@@ -1,5 +1,5 @@
+import { requireAdminAuth } from '@/lib/auth/admin-check'
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
 export default async function AdminRegistrationsPage({
@@ -7,21 +7,9 @@ export default async function AdminRegistrationsPage({
 }: {
   searchParams: { status?: string }
 }) {
+  // Check if user is authenticated and has admin role
+  const authResult = await requireAdminAuth()
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-
-  if (!session) {
-    redirect('/login')
-  }
-
-  // Check if user is admin
-  const { data: userData } = await supabase.auth.getUser()
-  const isAdmin = userData.user?.user_metadata?.role === 'admin' || 
-                  userData.user?.app_metadata?.role === 'admin'
-
-  if (!isAdmin) {
-    redirect('/portal')
-  }
 
   // Build query
   let query = supabase

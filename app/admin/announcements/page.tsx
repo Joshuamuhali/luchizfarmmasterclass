@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 
 export default function AdminAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<any[]>([])
@@ -10,12 +11,44 @@ export default function AdminAnnouncementsPage() {
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({ title: '', message: '' })
   const [submitting, setSubmitting] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const router = useRouter()
   
   const supabase = createClient()
 
   useEffect(() => {
+    checkAdminStatus()
     loadAnnouncements()
   }, [])
+
+  const checkAdminStatus = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        router.push('/admin/login')
+        return
+      }
+
+      // Check if user has admin role in profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      const profileData = profile as { role: string } | null
+      if (profileData?.role !== 'admin') {
+        router.push('/admin/login')
+        return
+      }
+
+      setIsAdmin(true)
+    } catch (error) {
+      console.error('Error checking admin status:', error)
+      router.push('/admin/login')
+    }
+  }
 
   const loadAnnouncements = async () => {
     try {

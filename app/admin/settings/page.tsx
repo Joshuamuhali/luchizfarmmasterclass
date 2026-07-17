@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 
 interface Settings {
   id: number
@@ -20,16 +21,9 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Settings | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [formData, setFormData] = useState<{
-    masterclass_title: string
-    masterclass_date: string
-    masterclass_time: string
-    whatsapp_link: string
-    price: string
-    max_seats: string
-    airtel_money_number: string
-    account_name: string
-  }>({
+  const [isAdmin, setIsAdmin] = useState(false)
+  const router = useRouter()
+  const [formData, setFormData] = useState<any>({
     masterclass_title: '',
     masterclass_date: '',
     masterclass_time: '',
@@ -43,8 +37,38 @@ export default function AdminSettingsPage() {
   const supabase = createClient()
 
   useEffect(() => {
+    checkAdminStatus()
     loadSettings()
   }, [])
+
+  const checkAdminStatus = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        router.push('/admin/login')
+        return
+      }
+
+      // Check if user has admin role in profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      const profileData = profile as { role: string } | null
+      if (profileData?.role !== 'admin') {
+        router.push('/admin/login')
+        return
+      }
+
+      setIsAdmin(true)
+    } catch (error) {
+      console.error('Error checking admin status:', error)
+      router.push('/admin/login')
+    }
+  }
 
   const loadSettings = async () => {
     try {
@@ -79,15 +103,16 @@ export default function AdminSettingsPage() {
     setSaving(true)
 
     try {
+      const form = formData as any
       const settingsData: any = {
-        masterclass_title: formData.masterclass_title,
-        masterclass_date: formData.masterclass_date,
-        masterclass_time: formData.masterclass_time,
-        whatsapp_link: formData.whatsapp_link,
-        price: parseFloat(formData.price),
-        max_seats: parseInt(formData.max_seats),
-        airtel_money_number: formData.airtel_money_number,
-        account_name: formData.account_name,
+        masterclass_title: form.masterclass_title,
+        masterclass_date: form.masterclass_date,
+        masterclass_time: form.masterclass_time,
+        whatsapp_link: form.whatsapp_link,
+        price: parseFloat(form.price),
+        max_seats: parseInt(form.max_seats),
+        airtel_money_number: form.airtel_money_number,
+        account_name: form.account_name,
         updated_at: new Date().toISOString()
       }
       
@@ -113,6 +138,14 @@ export default function AdminSettingsPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <p className="text-center text-foreground/70">Checking permissions...</p>
+      </div>
+    )
   }
 
   if (loading) {

@@ -1,22 +1,10 @@
+import { requireAdminAuth } from '@/lib/auth/admin-check'
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 
 export default async function AdminAuditLogsPage() {
+  // Check if user is authenticated and has admin role
+  const authResult = await requireAdminAuth()
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-
-  if (!session) {
-    redirect('/login')
-  }
-
-  // Check if user is admin
-  const { data: userData } = await supabase.auth.getUser()
-  const isAdmin = userData.user?.user_metadata?.role === 'admin' || 
-                  userData.user?.app_metadata?.role === 'admin'
-
-  if (!isAdmin) {
-    redirect('/portal')
-  }
 
   // Get audit logs
   const { data: auditLogs } = await supabase
