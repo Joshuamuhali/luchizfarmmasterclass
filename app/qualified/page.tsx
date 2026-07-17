@@ -73,7 +73,7 @@ export default function QualifiedPage({ searchParams }: { searchParams: { score?
           <div className="bg-green-50 border border-green-200 p-6 rounded-xl space-y-2">
             <p className="text-sm font-semibold text-green-800">Investment</p>
             <p className="text-4xl font-bold text-primary">ZMW 400</p>
-            <p className="text-sm text-green-700">Early Bird Price (Save ZMW 400)</p>
+            <p className="text-sm text-green-700">One-time payment</p>
           </div>
 
           {/* Next Steps */}

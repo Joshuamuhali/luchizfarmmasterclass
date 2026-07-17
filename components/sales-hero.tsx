@@ -1,19 +1,33 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
 
-export function SalesHero({ onRegisterClick }: { onRegisterClick: () => void }) {
-  const [spotsLeft, setSpotsLeft] = useState(parseInt(process.env.NEXT_PUBLIC_SPOTS_LIMIT || '15'))
-  const [daysLeft, setDaysLeft] = useState(5)
+export function SalesHero() {
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  })
 
   useEffect(() => {
-    // Simulate spots being filled
-    const interval = setInterval(() => {
-      setSpotsLeft((prev) => Math.max(1, prev - 1))
-    }, 60000) // Every minute
+    const masterclassDate = new Date('2026-08-05T19:30:00').getTime()
 
-    return () => clearInterval(interval)
+    const timer = setInterval(() => {
+      const now = new Date().getTime()
+      const distance = masterclassDate - now
+
+      if (distance > 0) {
+        setTimeLeft({
+          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((distance % (1000 * 60)) / 1000),
+        })
+      }
+    }, 1000)
+
+    return () => clearInterval(timer)
   }, [])
 
   return (
@@ -23,12 +37,29 @@ export function SalesHero({ onRegisterClick }: { onRegisterClick: () => void }) 
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
 
       <div className="relative z-10 max-w-3xl text-center space-y-8">
-        {/* Urgency Badge */}
-        <div className="inline-block">
-          <div className="glass px-6 py-2 rounded-full">
-            <p className="text-sm font-semibold text-primary">
-              🔥 Only {spotsLeft} Spots Remaining
-            </p>
+        {/* Countdown Timer */}
+        <div className="glass-strong p-4 rounded-2xl inline-block">
+          <p className="text-sm font-semibold text-foreground mb-3">⏰ Masterclass Starts In:</p>
+          <div className="flex gap-4 justify-center">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary">{timeLeft.days}</div>
+              <div className="text-xs text-foreground/70">Days</div>
+            </div>
+            <div className="text-2xl text-foreground/50">:</div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary">{timeLeft.hours}</div>
+              <div className="text-xs text-foreground/70">Hours</div>
+            </div>
+            <div className="text-2xl text-foreground/50">:</div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary">{timeLeft.minutes}</div>
+              <div className="text-xs text-foreground/70">Minutes</div>
+            </div>
+            <div className="text-2xl text-foreground/50">:</div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary">{timeLeft.seconds}</div>
+              <div className="text-xs text-foreground/70">Seconds</div>
+            </div>
           </div>
         </div>
 
@@ -38,75 +69,60 @@ export function SalesHero({ onRegisterClick }: { onRegisterClick: () => void }) 
             Master Pig Farming in <span className="text-primary">3 Days</span>
           </h1>
           <p className="text-xl md:text-2xl text-foreground/80 font-medium">
-            Learn the exact systems top farmers use to generate consistent income
+            Learn practical pig farming systems that help you reduce costs, improve production, and increase profitability.
           </p>
         </div>
 
-        {/* Sub-headline with benefit */}
-        <div className="glass-strong p-8 rounded-2xl space-y-4">
-          <p className="text-lg text-foreground/90">
-            You're working hard but not making the money you should. The problem? <strong>You don't have a system.</strong>
-          </p>
-          <p className="text-lg text-foreground/90">
-            This masterclass shows you the exact blueprint successful pig farmers use to go from struggling to thriving.
-          </p>
-        </div>
-
-        {/* Value Stack */}
-        <div className="grid md:grid-cols-3 gap-4 py-6">
-          <div className="glass p-4 rounded-xl">
-            <p className="text-3xl font-bold text-primary">3</p>
-            <p className="text-sm text-foreground/70">Days of Training</p>
+        {/* Event Details */}
+        <div className="flex flex-wrap justify-center gap-6 text-sm text-foreground/70">
+          <div className="flex items-center gap-2">
+            <span>📅</span>
+            <span>August 5–7, 2026</span>
           </div>
-          <div className="glass p-4 rounded-xl">
-            <p className="text-3xl font-bold text-primary">∞</p>
-            <p className="text-sm text-foreground/70">Lifetime Access</p>
+          <div className="flex items-center gap-2">
+            <span>💻</span>
+            <span>Live on Zoom</span>
           </div>
-          <div className="glass p-4 rounded-xl">
-            <p className="text-3xl font-bold text-primary">2w</p>
-            <p className="text-sm text-foreground/70">WhatsApp Support</p>
+          <div className="flex items-center gap-2">
+            <span>💰</span>
+            <span>ZMW 400</span>
           </div>
         </div>
 
-        {/* Price Section with Scarcity */}
-        <div className="space-y-4">
-          <div className="glass-strong p-6 rounded-2xl space-y-2 border-2 border-red-400/50">
-            <p className="text-sm font-semibold text-red-600">
-              ⚠️ Price increases in 48 hours
-            </p>
-            <div className="flex items-baseline justify-center gap-3">
-              <span className="text-5xl font-bold text-primary">ZMW 400</span>
-              <span className="text-xl text-foreground/50 line-through">ZMW 800</span>
+        {/* What's Included */}
+        <div className="glass-strong p-6 rounded-2xl">
+          <p className="text-sm font-semibold text-foreground mb-4">What's Included:</p>
+          <div className="grid md:grid-cols-2 gap-3 text-left text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-primary">✓</span>
+              <span>3 Days Live Training</span>
             </div>
-            <p className="text-sm text-foreground/70">
-              Early Bird Price - Save ZMW 400
-            </p>
-            <p className="text-xs text-red-600 font-semibold">
-              After price increase: ZMW 800
-            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-primary">✓</span>
+              <span>Lifetime Recording Access</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-primary">✓</span>
+              <span>Pig Feed eBook (15+ pages)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-primary">✓</span>
+              <span>2 Weeks WhatsApp Support</span>
+            </div>
           </div>
         </div>
 
-        {/* Main CTA */}
-        <div className="space-y-4 pt-6">
-          <Button
-            onClick={onRegisterClick}
-            size="lg"
-            className="w-full md:w-auto text-lg py-7 px-12 gradient-accent text-white shadow-2xl hover:shadow-3xl hover:scale-105 transition-all"
+        {/* Primary CTA */}
+        <div className="space-y-4 pt-4">
+          <a
+            href="/register"
+            className="block gradient-accent text-white font-bold py-7 px-12 rounded-xl text-lg hover:shadow-2xl transition-all hover:scale-105 text-center"
           >
-            Claim Your Spot Now
-          </Button>
-          <p className="text-sm text-foreground/60">
-            ✓ Instant access • ✓ Money-back guarantee • ✓ No credit card required
-          </p>
-        </div>
-
-        {/* Social Proof */}
-        <div className="glass p-6 rounded-2xl space-y-3">
-          <p className="text-sm font-semibold text-foreground">⭐ What Farmers Are Saying:</p>
-          <p className="text-foreground/80 italic">
-            "This changed my entire farm. I'm making 3x more profit now." - Mary K., Ndola
-          </p>
+            Reserve My Seat
+          </a>
+          <a href="#course-outline" className="text-sm text-foreground/60 hover:text-primary underline">
+            View Course Outline →
+          </a>
         </div>
       </div>
     </div>
